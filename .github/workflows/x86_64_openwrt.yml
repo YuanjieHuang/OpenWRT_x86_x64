@@ -8,6 +8,11 @@ on:
         required: false
         default: false
         type: boolean
+      tmux_connection_enabled:
+        description: 'ssh connection to tmux session'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REPO_URL: https://github.com/DHDAXCW/immortalwrt
@@ -26,6 +31,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: SSH connection to tmux session
+      if: ${{ github.event.inputs.tmux_connection_enabled == 'true' }}
+      uses: lhotari/action-upterm@v1
+      with:
+        limit-access-to-actor: true
+        wait-timeout-minutes: 15
+
     - name: Setup tmate session
       if: ${{ github.event.inputs.debug_enabled == 'true' }}
       uses: mxschmitt/action-tmate@v3
@@ -121,12 +133,12 @@ jobs:
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
-    - name: SSH debug on failure
-      if: failure()
-      uses: mxschmitt/action-tmate@v3
+    - name: SSH debug on compile failure
+      if: ${{ failure() }}
+      uses: lhotari/action-upterm@v1
       with:
         limit-access-to-actor: true
-        timeout-minutes: 15
+        wait-timeout-minutes: 15
 
     - name: Organize and Rename Files
       id: organize
