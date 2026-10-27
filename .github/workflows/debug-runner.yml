@@ -9,8 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Open tmate shell
-        uses: mxschmitt/action-tmate@v3
+      - name: Open upterm shell
+        uses: lhotari/action-upterm@v1
         with:
           limit-access-to-actor: true
-          timeout-minutes: 15
+          wait-timeout-minutes: 15
