@@ -2,6 +2,12 @@ name: immortalwrt_x86_64
 
 on:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: '开启 tmate 调试（编译前暂停）'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REPO_URL: https://github.com/DHDAXCW/immortalwrt
@@ -20,6 +26,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Setup tmate session
+      if: ${{ github.event.inputs.debug_enabled == 'true' }}
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+        timeout-minutes: 30
+        
     - name: Maximize build space
       uses: easimon/maximize-build-space@master
       with:
@@ -107,6 +120,13 @@ jobs:
         echo "date1=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
+        
+    - name: SSH debug on failure
+      if: failure()
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+        timeout-minutes: 15
 
     - name: Organize and Rename Files
       id: organize
